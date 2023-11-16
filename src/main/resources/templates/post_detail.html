@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>블로그 글 목록</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+</head>
+<body>
+<div layout:fragment="content" class="container my-3">
+    <h2 class="border-bottom py-2" th:text="${postResponse.title}"></h2>
+
+    <div class="card my-3">
+        <div class="card-body">
+            <div class="card-text" style="white-space: pre-line;" th:text="${postResponse.content}"></div>
+            <div class="d-flex justify-content-end">
+                <div th:if="${postResponse.modifiedDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
+                    <div class="mb-2">modified at</div>
+                    <div th:text="${#temporals.format(postResponse.modifiedDate, 'yyyy-MM-dd HH:mm')}"></div>
+                </div>
+                <div class="badge bg-light text-dark p-2 text-start">
+                    <div class="mb-2">
+                        <span th:if="${postResponse.author != null}" th:text="${postResponse.author.nickname}"></span>
+                    </div>
+                    <div th:text="${#temporals.format(postResponse.createdDate, 'yyyy-MM-dd HH:mm')}"></div>
+                </div>
+            </div>
+            <div class="my-3">
+                <a href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary"
+                   th:data-uri="@{|/post/vote/${postResponse.id}|}">
+                    추천
+<!--                                        <span class="badge rounded-pill bg-success" th:text="${#lists.size(postResponse.voter)}"></span>-->
+                    <span class="badge rounded-pill bg-success p-2" style="font-size: 1.2em;" th:text="${#lists.size(postResponse.voter)}"></span>
+                </a>
+                <a th:href="@{|/post/update/${postResponse.id}|}" class="btn btn-sm btn-outline-secondary"
+                   sec:authorize="isAuthenticated()"
+                   th:if="${postResponse.author != null and #authentication.getPrincipal().getUsername() == postResponse.author.nickname}"
+                   th:text="수정"></a>
+                <a href="javascript:void(0);" th:data-uri="@{|/post/delete/${postResponse.id}|}"
+                   class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
+                   th:if="${postResponse.author != null and #authentication.getPrincipal().getUsername() == postResponse.author.nickname}"
+                   th:text="삭제"></a>
+<!--                <a th:href="@{|/post/update/${postResponse.id}|}" class="btn btn-info ml-2">수정</a>-->
+<!--                <a th:href="@{|/post/delete/${postResponse.id}|}" class="btn btn-info ml-2">삭제</a>-->
+            </div>
+        </div>
+    </div>
+    <h5 class="border-bottom my-3 py-2"
+        th:text="|${#lists.size(postResponse.commentList)}개의 댓글이 있습니다.|"></h5>
+    <div th:each="comment : ${postResponse.commentList}">
+        <a th:id="|comment_${comment.id}|"></a>
+        <div class="card my-3">
+            <div class="card-body">
+                <div class="card-text" style="white-space: pre-line;" th:text="${comment.content}"></div>
+                <div class="d-flex justify-content-end">
+
+                    <div class="badge bg-light text-dark p-2 text-start">
+                        <div class="mb-2">
+                            <span th:if="${comment.author != null}" th:text="${comment.author.nickname}"></span>
+                        </div>
+                        <div th:text="${#temporals.format(comment.createdDate, 'yyyy-MM-dd HH:mm')}"></div>
+                    </div>
+                </div>
+                <!--                -->
+            </div>
+        </div>
+    </div>
+    <form th:action="@{|/comment/create/${postResponse.id}|}" th:object="${commentRequest}" method="post" class="my-3">
+        <div th:replace="form_errors :: formErrorsFragment"></div>
+        <textarea sec:authorize="isAnonymous()" disabled th:field="*{content}" class="form-control" rows="2"></textarea>
+        <textarea sec:authorize="isAuthenticated()" th:field="*{content}" class="form-control" rows="2"></textarea>
+        <div th:replace="form_errors :: formErrorsFragment"></div>
+<!--        <textarea  th:field="*{content}" class="form-control" rows="2"></textarea>-->
+
+        <input type="submit" value="댓글등록" class="btn btn-primary my-2">
+        <button type="button" class="btn btn-success" onclick="javascript:location.href='/post/list'">목록으로</button>
+    </form>
+</div>
+<script layout:fragment="script" type='text/javascript'>
+    const delete_elements = document.getElementsByClassName("delete");
+    Array.from(delete_elements).forEach(function(element) {
+        element.addEventListener('click', function() {
+            if(confirm("정말로 삭제하시겠습니까?")) {
+                location.href = this.dataset.uri;
+            };
+        });
+    });
+    const recommend_elements = document.getElementsByClassName("recommend");
+    Array.from(recommend_elements).forEach(function(element) {
+        element.addEventListener('click', function() {
+            if(confirm("정말로 추천하시겠습니까?")) {
+                location.href = this.dataset.uri;
+            };
+        });
+    });
+</script>

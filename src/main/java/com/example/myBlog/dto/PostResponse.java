@@ -26,6 +26,8 @@ public class PostResponse {
     private List<CommentEntity> commentList;
     private MemberEntity author;
     private Set<MemberResponse> voter;
+    private String filePath;
+    private String fileName;
 
     @Builder
     public PostResponse(PostEntity postEntity){
@@ -39,6 +41,8 @@ public class PostResponse {
         this.author = postEntity.getAuthor();
        //this.voter = postEntity.getVoter().stream().map(MemberResponse::new).collect(Collectors.toSet());
         this.voter = postEntity.getVoter().stream().map(MemberEntity::toDto).collect(Collectors.toSet());
+        this.fileName = postEntity.getFileName();
+        this.filePath = postEntity.getFilePath();
 
     }
     public PostEntity toEntity(){
@@ -48,6 +52,8 @@ public class PostResponse {
                 .content(content)
                 .author(author)
                 .voter(voter.stream().map(MemberResponse::toEntity).collect(Collectors.toSet()))
+                .filePath(filePath)
+                .fileName(fileName)
                 .build();
     }
 

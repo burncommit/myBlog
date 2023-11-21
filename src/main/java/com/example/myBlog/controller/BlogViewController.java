@@ -15,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
@@ -44,10 +45,13 @@ public class BlogViewController {
     }
     //  PostRequest --> @NotEmpty, @Size 등으로 설정한 검증 기능 동작
 // BindingResult 매개변수는 @Valid 애너테이션으로 인해 검증이 수행된 결과를 의미하는 객체이다.
+
+
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/create")
     public String postCreate(@Valid PostRequest postRequest,
-                             BindingResult bindingResult, Principal principal){
+                             BindingResult bindingResult, Principal principal, MultipartFile file)
+    throws Exception{
         if(bindingResult.hasErrors()){
             return "post_form";
         }
@@ -55,7 +59,7 @@ public class BlogViewController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "등록 권한이 없습니다.");
         }
         MemberResponse memberResponse = memberService.getMember(principal.getName());
-        blogService.create(postRequest.getTitle(), postRequest.getContent(), memberResponse);
+        blogService.create(postRequest.getTitle(), postRequest.getContent(), memberResponse, file);
         return "redirect:/";
     }
 
@@ -83,12 +87,15 @@ public class BlogViewController {
         }
         postRequest.setTitle(postResponse.getTitle());
         postRequest.setContent(postResponse.getContent());
+        postRequest.setFilePath(postResponse.getFilePath());
+        postRequest.setFileName(postResponse.getFileName());
 
         return "post_update";
     }
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/update/{id}")
-    public String postUpdate(@Valid PostRequest postRequest,BindingResult bindingResult, @PathVariable("id") Long id ,Principal principal){
+    public String postUpdate(@Valid PostRequest postRequest,BindingResult bindingResult, @PathVariable("id") Long id
+            ,Principal principal, MultipartFile file)throws Exception{
         if(bindingResult.hasErrors()){
             return "post_update";
         }
@@ -96,7 +103,7 @@ public class BlogViewController {
         if(!postResponse.getAuthor().getNickname().equals(principal.getName())){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"수정 권한이 없습니다");
         }
-        blogService.update(postResponse, postRequest.getTitle(), postRequest.getContent());
+        blogService.update(postResponse, postRequest.getTitle(), postRequest.getContent(), file);
         return "redirect:/post/detail/" + id;
     }
 

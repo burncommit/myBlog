@@ -39,10 +39,13 @@ public class PostEntity extends BaseTimeEntity {
     @ManyToMany
     Set<MemberEntity> voter;
 
+    private String fileName;
+    private String filePath;
+
     @Builder
     public PostEntity(Long id, String title, String content, List<CommentEntity> commentList, MemberEntity author
             , Set<MemberEntity> voter, LocalDateTime createdDate, LocalDateTime modifiedDate
-    ,int readCnt){
+    ,int readCnt,String fileName, String filePath){
         this.id = id;
      this.title = title;
      this.content = content;
@@ -52,6 +55,8 @@ public class PostEntity extends BaseTimeEntity {
      this.setCreatedDate(createdDate);
      this.setModifiedDate(modifiedDate);
      this.readCnt = readCnt;
+     this.fileName = fileName;
+     this.filePath = filePath;
 }
 
 public void update(PostResponse postResponse){

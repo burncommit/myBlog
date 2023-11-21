@@ -19,10 +19,15 @@ public class PostRequest {
     @NotEmpty(message = "내용은 필수항목입니다.")
     private String content;
 
+    private String filePath;
+    private String fileName;
+
     public PostRequest(PostEntity postEntity) {
 
         this.title = postEntity.getTitle();
         this.content = postEntity.getContent();
+        this.filePath = postEntity.getFilePath();
+        this.fileName = postEntity.getFileName();
     }
 
 }

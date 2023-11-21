@@ -15,11 +15,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,25 +54,30 @@ public class BlogService {
 
     }
 
-    public void create(String title, String content ,MemberResponse memberResponse){
-//        PostResponse postResponse = new PostResponse();
-//        postResponse.setTitle(title);
-//        postResponse.setContent(content);
-        // 작성자(Member) 정보를 DB에서 가져온 MemberResponse에서 설정
+    public void create(String title, String content , MemberResponse memberResponse, MultipartFile file)
+    throws Exception{
+        String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files";//저장경로지정
+
+        UUID uuid = UUID.randomUUID();//파일이름에 붙일 랜덤 식별자
+
+        String fileName = uuid + "_" + file.getOriginalFilename();//랜덤 이름을 붙이고
+
+        File saveFile = new File(projectPath, fileName);
+
+        file.transferTo(saveFile);
+
+
         MemberEntity author = MemberEntity.builder()
                 .id(memberResponse.getId())
                 .build();
-//        postResponse.setAuthor(author);
 
-
-
-
-        //PostEntity  postEntity = postResponse.toEntity();
         PostEntity postEntity = PostEntity.builder()
 
                 .title(title)
                 .content(content)
                 .author(author)
+                .fileName(fileName)
+                .filePath("/files/" + fileName)
                 .build();
 
 
@@ -106,27 +116,77 @@ public class BlogService {
 
     public void delete(PostResponse postResponse){
         blogRepository.deleteById(postResponse.getId());
+
+
+        //업로드한 이미지 삭제 기능
+        File file = new File(System.getProperty("user.dir") + "/src/main/resources/static/files/" + postResponse.getFileName());
+
+        if(file.exists()){
+            file.delete();
+            System.out.println("delete success");
+        }else{
+            System.out.println("delete fail");
+        }
+
+
+
     }
 
-    public PostResponse update(PostResponse postResponse, String title, String content){
+    public PostResponse update(PostResponse postResponse, String title, String content, MultipartFile file) throws Exception{
+
         postResponse.setTitle(title);
         postResponse.setContent(content);
         postResponse.setModifiedDate(LocalDateTime.now());
-        PostEntity postEntity = PostEntity.builder()
-                .id(postResponse.getId())
-                .title(postResponse.getTitle())
-                .content(postResponse.getContent())
-                .author(postResponse.getAuthor())
-                .voter(postResponse.getVoter().stream().map(MemberResponse::toEntity).collect(Collectors.toSet()))
-                .createdDate(postResponse.getCreatedDate())
-                .modifiedDate(postResponse.getModifiedDate())
-                .readCnt(postResponse.getReadCnt())
-                .build();
+
+        if(file.isEmpty()){ //이미지 넘어온게 없다면 본래 이미지 그대로
+
+
+
+            PostEntity postEntity = PostEntity.builder()
+                    .id(postResponse.getId())
+                    .title(postResponse.getTitle())
+                    .content(postResponse.getContent())
+                    .author(postResponse.getAuthor())
+                    .voter(postResponse.getVoter().stream().map(MemberResponse::toEntity).collect(Collectors.toSet()))
+                    .createdDate(postResponse.getCreatedDate())
+                    .modifiedDate(postResponse.getModifiedDate())
+                    .readCnt(postResponse.getReadCnt())
+                    .fileName(postResponse.getFileName())
+                    .filePath("/files/" + postResponse.getFileName())
+                    .build();
+            blogRepository.save(postEntity);
+        }else {
+
+            String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files";//저장경로지정
+
+            UUID uuid = UUID.randomUUID();//파일이름에 붙일 랜덤 식별자
+
+            String fileName = uuid + "_" + file.getOriginalFilename();//랜덤 이름을 붙이고
+
+            File saveFile = new File(projectPath, fileName);
+
+            file.transferTo(saveFile);
+
+            PostEntity postEntity = PostEntity.builder()
+                    .id(postResponse.getId())
+                    .title(postResponse.getTitle())
+                    .content(postResponse.getContent())
+                    .author(postResponse.getAuthor())
+                    .voter(postResponse.getVoter().stream().map(MemberResponse::toEntity).collect(Collectors.toSet()))
+                    .createdDate(postResponse.getCreatedDate())
+                    .modifiedDate(postResponse.getModifiedDate())
+                    .readCnt(postResponse.getReadCnt())
+                    .fileName(fileName)
+                    .filePath("/files/" + fileName)
+                    .build();
+            blogRepository.save(postEntity);
+        }
 
 
 
 
-        blogRepository.save(postEntity);
+
+
         return postResponse;
     }
 
@@ -148,4 +208,6 @@ public class BlogService {
     );
         return postResponse;
     }
+
+
 }

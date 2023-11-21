@@ -8,7 +8,7 @@
 <body>
 <div class="container">
     <h5 class="my-3 border-bottom pb-2">게시글등록</h5>
-    <form th:object="${postRequest}" method="post">
+    <form th:object="${postRequest}" method="post" enctype="multipart/form-data">
         <div class="alert alert-danger" role="alert" th:if="${#fields.hasAnyErrors()}">
             <div th:each="err : ${#fields.allErrors()}" th:text="${err}" />
         </div>
@@ -19,13 +19,44 @@
         <div class="mb-3">
             <label for="content" class="form-label">내용</label>
             <textarea th:field="*{content}" class="form-control" rows="10"></textarea>
+
+        <input type="file" name="file">
+
+
         </div>
+
+
+
         <input type="submit" value="저장하기" class="btn btn-primary my-2">
         <button type="button" class="btn btn-success" onclick="javascript:location.href='/'">목록으로</button>
     </form>
 </div>
 
 <!-- 부트스트랩 js, jquery 추가 -->
-<script src="/js/lib/jquery.min.js"></script>
-<script src="/js/lib/bootstrap.min.js"></script>
+<!--<script >-->
+<!--    let selectedFiles = [];-->
+
+<!--        function test(files){-->
+<!--            console.log(files);-->
+<!--            const fileList = document.getElementById("file-list");-->
+<!--            for(let i = 0; i < files.length; i++){-->
+<!--                selectedFiles.push(files[i]);-->
+<!--                const item = document.createElement('div');-->
+<!--                const fileName = document.createTextNode(files[i].name);-->
+<!--                const deleteButton = document.createElement('button');-->
+<!--                deleteButton.addEventListener('click', (event) => {-->
+<!--                    item.remove();-->
+<!--                    event.preventDefault();-->
+<!--                    deleteFile(files[i]);-->
+<!--                 });-->
+<!--                deleteButton.innerText="X";-->
+<!--                item.appendChild(fileName);-->
+<!--                item.appendChild(deleteButton);-->
+<!--                fileList.appendChild(item);-->
+<!--            }-->
+<!--         }-->
+
+
+<!--</script>-->
+
 </body>

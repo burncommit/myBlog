@@ -12,7 +12,11 @@
     <div class="card my-3">
         <div class="card-body">
 
-            <div><img th:src="@{${postResponse.filePath}}"></div>
+            <div th:each="img : ${postResponse.imgEntity}">
+<!--                <div><img th:src="@{${postResponse.imgEntity}}"></div>-->
+                <img th:src="@{${img.filePath}}" class="img-fluid">
+            </div>
+
 
 
             <div class="card-text" style="white-space: pre-line;" th:text="${postResponse.content}"></div>

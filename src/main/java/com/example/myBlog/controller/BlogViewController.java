@@ -50,7 +50,7 @@ public class BlogViewController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/create")
     public String postCreate(@Valid PostRequest postRequest,
-                             BindingResult bindingResult, Principal principal, MultipartFile file)
+                             BindingResult bindingResult, Principal principal, List<MultipartFile> files)
     throws Exception{
         if(bindingResult.hasErrors()){
             return "post_form";
@@ -59,7 +59,7 @@ public class BlogViewController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "등록 권한이 없습니다.");
         }
         MemberResponse memberResponse = memberService.getMember(principal.getName());
-        blogService.create(postRequest.getTitle(), postRequest.getContent(), memberResponse, file);
+        blogService.create(postRequest.getTitle(), postRequest.getContent(), memberResponse, files);
         return "redirect:/";
     }
 
@@ -87,15 +87,16 @@ public class BlogViewController {
         }
         postRequest.setTitle(postResponse.getTitle());
         postRequest.setContent(postResponse.getContent());
-        postRequest.setFilePath(postResponse.getFilePath());
-        postRequest.setFileName(postResponse.getFileName());
+        //postRequest.setFilePath(postResponse.getFilePath());
+        //postRequest.setFileName(postResponse.getFileName());
+        postRequest.setImgEntity(postResponse.getImgEntity());
 
         return "post_update";
     }
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/update/{id}")
     public String postUpdate(@Valid PostRequest postRequest,BindingResult bindingResult, @PathVariable("id") Long id
-            ,Principal principal, MultipartFile file)throws Exception{
+            ,Principal principal, List<MultipartFile> files)throws Exception{
         if(bindingResult.hasErrors()){
             return "post_update";
         }
@@ -103,7 +104,7 @@ public class BlogViewController {
         if(!postResponse.getAuthor().getNickname().equals(principal.getName())){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"수정 권한이 없습니다");
         }
-        blogService.update(postResponse, postRequest.getTitle(), postRequest.getContent(), file);
+        blogService.update(postResponse, postRequest.getTitle(), postRequest.getContent(), files);
         return "redirect:/post/detail/" + id;
     }
 

@@ -1,10 +1,12 @@
 package com.example.myBlog.dto;
 
+import com.example.myBlog.entity.ImgEntity;
 import com.example.myBlog.entity.PostEntity;
 import lombok.*;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,15 +21,13 @@ public class PostRequest {
     @NotEmpty(message = "내용은 필수항목입니다.")
     private String content;
 
-    private String filePath;
-    private String fileName;
+    private List<ImgEntity> imgEntity;
 
     public PostRequest(PostEntity postEntity) {
 
         this.title = postEntity.getTitle();
         this.content = postEntity.getContent();
-        this.filePath = postEntity.getFilePath();
-        this.fileName = postEntity.getFileName();
+        this.imgEntity = postEntity.getImgEntity();
     }
 
 }

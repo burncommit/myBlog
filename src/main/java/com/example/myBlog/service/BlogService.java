@@ -4,9 +4,11 @@ package com.example.myBlog.service;
 import com.example.myBlog.config.DataNotFoundException;
 import com.example.myBlog.dto.MemberResponse;
 import com.example.myBlog.dto.PostResponse;
+import com.example.myBlog.entity.ImgEntity;
 import com.example.myBlog.entity.MemberEntity;
 import com.example.myBlog.entity.PostEntity;
 import com.example.myBlog.repository.BlogRepository;
+import com.example.myBlog.repository.ImgRepository;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.time.LocalDateTime;
@@ -32,6 +35,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BlogService {
     private final BlogRepository blogRepository;
+    private final ImgService imgService;
+
+    private final ImgRepository imgRepository;
 
 
     public List<PostEntity> findAll(){
@@ -54,18 +60,8 @@ public class BlogService {
 
     }
 
-    public void create(String title, String content , MemberResponse memberResponse, MultipartFile file)
+    public void create(String title, String content , MemberResponse memberResponse, List<MultipartFile> files)
     throws Exception{
-        String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files";//저장경로지정
-
-        UUID uuid = UUID.randomUUID();//파일이름에 붙일 랜덤 식별자
-
-        String fileName = uuid + "_" + file.getOriginalFilename();//랜덤 이름을 붙이고
-
-        File saveFile = new File(projectPath, fileName);
-
-        file.transferTo(saveFile);
-
 
         MemberEntity author = MemberEntity.builder()
                 .id(memberResponse.getId())
@@ -76,12 +72,17 @@ public class BlogService {
                 .title(title)
                 .content(content)
                 .author(author)
-                .fileName(fileName)
-                .filePath("/files/" + fileName)
                 .build();
 
+        blogRepository.save(postEntity); //이미지 없이 나머지 컬럼들 저장
 
-        blogRepository.save(postEntity);
+        List<ImgEntity> imgEntities = new ArrayList<>();
+
+        for(MultipartFile m : files){
+
+            imgEntities.add(imgService.saveImg(m, postEntity)); // postEntity에 매핑된 이미지 테이블 저장
+        }
+
 
     }
 
@@ -119,28 +120,36 @@ public class BlogService {
 
 
         //업로드한 이미지 삭제 기능
-        File file = new File(System.getProperty("user.dir") + "/src/main/resources/static/files/" + postResponse.getFileName());
-
-        if(file.exists()){
-            file.delete();
-            System.out.println("delete success");
-        }else{
-            System.out.println("delete fail");
+//        File file = new File(System.getProperty("user.dir") + "/src/main/resources/static/files/" + postResponse.getFileName());
+        for(ImgEntity img : postResponse.getImgEntity()){
+            File file = new File(System.getProperty("user.dir") + "/src/main/resources/static/files/" + img.getFileName()   );
+            if(file.exists()){
+                file.delete();
+                System.out.println("delete success");
+            }else{
+                System.out.println("delete fail");
+            }
         }
+        //File file = new File(System.getProperty("user.dir") + "/src/main/resources/static/files/" + postResponse.getImgEntity());
+
+//        if(file.exists()){
+//            file.delete();
+//            System.out.println("delete success");
+//        }else{
+//            System.out.println("delete fail");
+//        }
 
 
 
     }
 
-    public PostResponse update(PostResponse postResponse, String title, String content, MultipartFile file) throws Exception{
+    public PostResponse update(PostResponse postResponse, String title, String content, List<MultipartFile> files) throws Exception{
 
         postResponse.setTitle(title);
         postResponse.setContent(content);
         postResponse.setModifiedDate(LocalDateTime.now());
 
-        if(file.isEmpty()){ //이미지 넘어온게 없다면 본래 이미지 그대로
-
-
+        if(files.isEmpty()){ //이미지 넘어온게 없다면 본래 이미지 그대로
 
             PostEntity postEntity = PostEntity.builder()
                     .id(postResponse.getId())
@@ -151,22 +160,11 @@ public class BlogService {
                     .createdDate(postResponse.getCreatedDate())
                     .modifiedDate(postResponse.getModifiedDate())
                     .readCnt(postResponse.getReadCnt())
-                    .fileName(postResponse.getFileName())
-                    .filePath("/files/" + postResponse.getFileName())
+                    .imgEntity(postResponse.getImgEntity())
                     .build();
             blogRepository.save(postEntity);
         }else {
 
-            String projectPath = System.getProperty("user.dir") + "\\src\\main\\resources\\static\\files";//저장경로지정
-
-            UUID uuid = UUID.randomUUID();//파일이름에 붙일 랜덤 식별자
-
-            String fileName = uuid + "_" + file.getOriginalFilename();//랜덤 이름을 붙이고
-
-            File saveFile = new File(projectPath, fileName);
-
-            file.transferTo(saveFile);
-
             PostEntity postEntity = PostEntity.builder()
                     .id(postResponse.getId())
                     .title(postResponse.getTitle())
@@ -176,10 +174,16 @@ public class BlogService {
                     .createdDate(postResponse.getCreatedDate())
                     .modifiedDate(postResponse.getModifiedDate())
                     .readCnt(postResponse.getReadCnt())
-                    .fileName(fileName)
-                    .filePath("/files/" + fileName)
+                    .imgEntity(postResponse.getImgEntity())
                     .build();
             blogRepository.save(postEntity);
+
+            List<ImgEntity> imgEntities = new ArrayList<>();
+
+            for(MultipartFile m : files){
+
+                imgEntities.add(imgService.saveImg(m, postEntity)); // postEntity에 매핑된 이미지 테이블 저장
+            }
         }
 
 
@@ -208,6 +212,8 @@ public class BlogService {
     );
         return postResponse;
     }
+
+
 
 
 }

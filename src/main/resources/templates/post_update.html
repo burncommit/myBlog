@@ -23,7 +23,13 @@
         </div>
         <div class="mb-3">
             <label class="form-label">사진</label>
-            <div><img th:src="@{*{filePath}}"></div>
+<!--            <div><img th:src="@{*{filePath}}"></div>-->
+
+            <div th:each="img : *{imgEntity}">
+                <!--                <div><img th:src="@{${postResponse.imgEntity}}"></div>-->
+                <img th:src="@{${img.filePath}}" class="img-fluid">
+            </div>
+
         </div>
         <div class="mb-3">
             <label class="form-label">내용</label>
@@ -31,9 +37,12 @@
             <textarea th:field="*{content}" class="form-control" rows="5" cols="" name="content"></textarea>
         </div>
         <th>첨부이미지 : </th>
-        <td th:text="*{fileName}"></td>
+        <div th:each="img : *{imgEntity}">
+            <td th:text="${img.fileName}"></td>
+        </div>
+
         <br>
-        <input type="file" name="file">
+        <input type="file" name="files" multiple="multiple">
 
         <input type="submit" value="저장하기" class="btn btn-primary my-2">
         <button type="button" class="btn btn-success" onclick="javascript:location.href='/'">목록으로</button>
@@ -47,10 +56,7 @@
 
 
 <script th:inline="javascript">
-    var postRequestObject = [[${postRequest}]];
-    function Message(){
-    alert(postRequestObject.fileName);
-    }
+
 
 
 </script>

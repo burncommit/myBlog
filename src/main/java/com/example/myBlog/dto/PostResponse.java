@@ -1,6 +1,7 @@
 package com.example.myBlog.dto;
 
 import com.example.myBlog.entity.CommentEntity;
+import com.example.myBlog.entity.ImgEntity;
 import com.example.myBlog.entity.MemberEntity;
 import com.example.myBlog.entity.PostEntity;
 import lombok.*;
@@ -26,8 +27,7 @@ public class PostResponse {
     private List<CommentEntity> commentList;
     private MemberEntity author;
     private Set<MemberResponse> voter;
-    private String filePath;
-    private String fileName;
+    private List<ImgEntity> imgEntity;
 
     @Builder
     public PostResponse(PostEntity postEntity){
@@ -41,9 +41,7 @@ public class PostResponse {
         this.author = postEntity.getAuthor();
        //this.voter = postEntity.getVoter().stream().map(MemberResponse::new).collect(Collectors.toSet());
         this.voter = postEntity.getVoter().stream().map(MemberEntity::toDto).collect(Collectors.toSet());
-        this.fileName = postEntity.getFileName();
-        this.filePath = postEntity.getFilePath();
-
+        this.imgEntity = postEntity.getImgEntity();
     }
     public PostEntity toEntity(){
         return PostEntity.builder()
@@ -52,8 +50,7 @@ public class PostResponse {
                 .content(content)
                 .author(author)
                 .voter(voter.stream().map(MemberResponse::toEntity).collect(Collectors.toSet()))
-                .filePath(filePath)
-                .fileName(fileName)
+                .imgEntity(imgEntity)
                 .build();
     }
 

@@ -36,13 +36,26 @@
 
             <textarea th:field="*{content}" class="form-control" rows="5" cols="" name="content"></textarea>
         </div>
-        <th>첨부이미지 : </th>
-        <div th:each="img : *{imgEntity}">
-            <td th:text="${img.fileName}"></td>
+
+
+
+        <input type="file" name="files" multiple="multiple" onchange="test(this.files)">
+        <div id="file-list">
         </div>
 
-        <br>
-        <input type="file" name="files" multiple="multiple">
+
+
+
+<!--        <br><br>-->
+<!--        <p><업로드된 파일></p>-->
+
+<!--        <div th:each="img : *{imgEntity}">-->
+<!--            <td th:text="${img.fileName}"></td>-->
+<!--            <button type="button" class="btn btn-success" id="delete-btn" th:value="${img.fileName}" >X</button>-->
+<!--        </div>-->
+
+
+
 
         <input type="submit" value="저장하기" class="btn btn-primary my-2">
         <button type="button" class="btn btn-success" onclick="javascript:location.href='/'">목록으로</button>
@@ -55,8 +68,45 @@
 
 
 
-<script th:inline="javascript">
+<script >
+    let selectedFiles = [];
+    가져와서 files에 넣고
 
+
+
+            function test(files) {
+                console.log(files);
+                const fileList = document.getElementById('file-list');
+                for(let i=0; i<files.length; i++) {
+                    selectedFiles.push(files[i]);
+                    const item = document.createElement('div');
+                    const fileName = document.createTextNode(files[i].name);
+                    const deleteButton = document.createElement('button');
+                    deleteButton.addEventListener('click', (event) => {
+                        item.remove();
+                        event.preventDefault();
+                        deleteFile(files[i]);
+                    });
+
+
+                    selectedFiles.push
+
+
+                    deleteButton.innerText="X";
+                    item.appendChild(fileName);
+                    item.appendChild(deleteButton);
+                    fileList.appendChild(item);
+                }
+            }
+         function deleteFile(deleteFile) {
+                const inputFile = document.querySelector('input[name="files"]');
+                const dataTransfer = new DataTransfer();
+                selectedFiles = selectedFiles.filter(file => file!==deleteFile);
+                selectedFiles.forEach(file => {
+                    dataTransfer.items.add(file);
+                })
+                inputFile.files = dataTransfer.files;
+            }
 
 
 </script>

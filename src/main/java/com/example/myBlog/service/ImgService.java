@@ -47,4 +47,9 @@ public class ImgService {
         return imgRepository.save(imgEntity);
 
     }
+    //첨부이미지 삭제 api
+    public void ImgDelete(String fileName){
+
+
+    }
 }

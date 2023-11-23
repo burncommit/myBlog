@@ -83,7 +83,12 @@
         <button type="button" class="btn btn-success" onclick="javascript:location.href='/post/list'">목록으로</button>
     </form>
 </div>
-<script layout:fragment="script" type='text/javascript'>
+
+<script >
+
+
+
+
     const delete_elements = document.getElementsByClassName("delete");
     Array.from(delete_elements).forEach(function(element) {
         element.addEventListener('click', function() {

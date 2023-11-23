@@ -11,7 +11,7 @@
     <form th:object="${postRequest}" method="post" enctype="multipart/form-data">
 
 
-        <input type="hidden"/>
+        <input type="hidden" id="post_id" th:value="*{id}"   />
         <!--        th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />-->
         <div class="alert alert-danger" role="alert" th:if="${#fields.hasAnyErrors()}">
             <div th:each="err : ${#fields.allErrors()}" th:text="${err}" />
@@ -25,9 +25,10 @@
             <label class="form-label">사진</label>
 <!--            <div><img th:src="@{*{filePath}}"></div>-->
 
-            <div th:each="img : *{imgEntity}">
+
+            <div th:each="img : *{imgEntity}" >
                 <!--                <div><img th:src="@{${postResponse.imgEntity}}"></div>-->
-                <img th:src="@{${img.filePath}}" class="img-fluid">
+                <img th:src="@{${img.filePath}}"  class="img-fluid">
             </div>
 
         </div>
@@ -37,27 +38,24 @@
             <textarea th:field="*{content}" class="form-control" rows="5" cols="" name="content"></textarea>
         </div>
 
+        <button type="button" class="btn btn-success" id="imgUpdateBtn" >이미지 추가/삭제</button>
 
+        <div id = 'imgUpdateForm' style="display:none;">
+
+        <div id="exist-img">
+        </div>
 
         <input type="file" name="files" multiple="multiple" onchange="test(this.files)">
+<!--        this.files  : 내가 인풋태그에 첨부한 파일-->
         <div id="file-list">
+        </div>
+
         </div>
 
 
 
 
-<!--        <br><br>-->
-<!--        <p><업로드된 파일></p>-->
-
-<!--        <div th:each="img : *{imgEntity}">-->
-<!--            <td th:text="${img.fileName}"></td>-->
-<!--            <button type="button" class="btn btn-success" id="delete-btn" th:value="${img.fileName}" >X</button>-->
-<!--        </div>-->
-
-
-
-
-        <input type="submit" value="저장하기" class="btn btn-primary my-2">
+        <input type="submit" value="저장하기" id="updateSave" class="btn btn-primary my-2">
         <button type="button" class="btn btn-success" onclick="javascript:location.href='/'">목록으로</button>
         <!--        <button type="submit" class="btn btn-primary">등록</button>-->
         <button type="button" class="btn btn-success" onclick="Message()">버튼</button>
@@ -69,14 +67,79 @@
 
 
 <script >
+    document.getElementById('imgUpdateBtn').addEventListener('click', function(){
+        document.getElementById('imgUpdateForm').style.display = 'block';
+        document.getElementById('imgUpdateBtn').style.display = 'none';
+
+        let id = document.getElementById('post_id').value;
+        fetch(`/img/find/${id}`, {
+            method: 'GET'
+        })
+            .then((response) => response.json())
+            .then((obj) => {
+                console.log(obj[0].fileName);
+
+
+
+                let fileNameList = [];
+                const fileList2 = document.getElementById('exist-img');
+
+                for(let i = 0; i < obj.length; i++){
+
+                    fileNameList.push(obj[i]);
+
+                    const item2 = document.createElement('div');
+                    const fileName2 = document.createTextNode(obj[i].fileName);
+                    const deleteButton2 = document.createElement('button');
+                    deleteButton2.addEventListener('click', (event) => {
+                            item2.remove();
+                            event.preventDefault();
+                            deleteFileSave(obj[i].fileName);
+                    });
+                    deleteButton2.innerText="X";
+                    item2.appendChild(fileName2);
+                    item2.appendChild(deleteButton2);
+                    fileList2.appendChild(item2);
+
+
+                }
+            });
+    });
+    let removingImgs = [];
+    function deleteFileSave(deleteFile) {
+        removingImgs.push(deleteFile);
+        console.log(removingImgs);
+    }
+
+    document.getElementById('updateSave').addEventListener('click', function(){
+<!--        let fileName = document.getElementById('[[${postRequest.imgEntity[0].fileName}]]').value;-->
+
+        fetch(`/img/delete/${removingImgs}`, {
+            method: 'DELETE'
+        })
+            .then(() => {
+                alert('수정이 완료되었습니다.');
+
+            });
+    });
+
+
+
+
+function Message()  {
+
+        console.log(data2);
+
+    }
+
     let selectedFiles = [];
-    가져와서 files에 넣고
-
-
 
             function test(files) {
                 console.log(files);
+
                 const fileList = document.getElementById('file-list');
+
+
                 for(let i=0; i<files.length; i++) {
                     selectedFiles.push(files[i]);
                     const item = document.createElement('div');
@@ -87,10 +150,6 @@
                         event.preventDefault();
                         deleteFile(files[i]);
                     });
-
-
-                    selectedFiles.push
-
 
                     deleteButton.innerText="X";
                     item.appendChild(fileName);

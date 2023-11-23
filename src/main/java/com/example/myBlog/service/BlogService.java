@@ -215,5 +215,9 @@ public class BlogService {
 
 
 
+    public PostEntity findById(long id)    {
+        return blogRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("not found: " + id));
+    }
 
 }

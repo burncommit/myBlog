@@ -10,6 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,6 +22,7 @@ public class ImgService {
 
 
     private final ImgRepository imgRepository;
+
 
 
 
@@ -47,9 +50,12 @@ public class ImgService {
         return imgRepository.save(imgEntity);
 
     }
-    //첨부이미지 삭제 api
-    public void ImgDelete(String fileName){
 
+
+    public void delete(String fileName){
+       Long id = imgRepository.findByFileNameContaining(fileName).getId();
+       imgRepository.deleteById(id);
 
     }
+
 }

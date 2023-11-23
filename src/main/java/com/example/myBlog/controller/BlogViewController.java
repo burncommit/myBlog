@@ -6,6 +6,7 @@ import com.example.myBlog.dto.PostRequest;
 import com.example.myBlog.dto.PostResponse;
 import com.example.myBlog.entity.PostEntity;
 import com.example.myBlog.service.BlogService;
+import com.example.myBlog.service.ImgService;
 import com.example.myBlog.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.io.File;
 import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +31,7 @@ public class BlogViewController {
 
     private final BlogService blogService;
     private final MemberService memberService;
+    private final ImgService imgService;
 
     @GetMapping("/post/list")
     public String list(Model model, @RequestParam(value = "page", defaultValue = "0")
@@ -85,11 +88,13 @@ public class BlogViewController {
         if(!postResponse.getAuthor().getNickname().equals(principal.getName())){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"수정 권한이 없습니다");
         }
+        postRequest.setId(postResponse.getId());
         postRequest.setTitle(postResponse.getTitle());
         postRequest.setContent(postResponse.getContent());
-        //postRequest.setFilePath(postResponse.getFilePath());
-        //postRequest.setFileName(postResponse.getFileName());
+
         postRequest.setImgEntity(postResponse.getImgEntity());
+
+
 
         return "post_update";
     }
@@ -107,6 +112,12 @@ public class BlogViewController {
         blogService.update(postResponse, postRequest.getTitle(), postRequest.getContent(), files);
         return "redirect:/post/detail/" + id;
     }
+
+
+
+
+
+
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/post/vote/{id}")

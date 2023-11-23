@@ -89,7 +89,7 @@
                     fileNameList.push(obj[i]);
 
                     const item2 = document.createElement('div');
-                    const fileName2 = document.createTextNode(obj[i].fileName);
+                    const fileName2 = document.createTextNode(obj[i].originName);
                     const deleteButton2 = document.createElement('button');
                     deleteButton2.addEventListener('click', (event) => {
                             item2.remove();
@@ -112,13 +112,12 @@
     }
 
     document.getElementById('updateSave').addEventListener('click', function(){
-<!--        let fileName = document.getElementById('[[${postRequest.imgEntity[0].fileName}]]').value;-->
 
         fetch(`/img/delete/${removingImgs}`, {
             method: 'DELETE'
         })
             .then(() => {
-                alert('수정이 완료되었습니다.');
+                alert('저장이 완료되었습니다.');
 
             });
     });

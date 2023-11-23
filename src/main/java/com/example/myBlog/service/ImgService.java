@@ -45,6 +45,7 @@ public class ImgService {
                 .postEntity(postEntity)
                 .fileName(fileName)
                 .filePath("/files/" + fileName)
+                .originName(files.getOriginalFilename())
                 .build();
 
         return imgRepository.save(imgEntity);

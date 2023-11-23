@@ -21,13 +21,15 @@ public class ImgEntity {
 
     private String fileName;
     private String filePath;
+    private String originName;
 
     @Builder
-    public ImgEntity(Long id, PostEntity postEntity, String fileName, String filePath){
+    public ImgEntity(Long id, PostEntity postEntity, String fileName, String filePath, String originName){
         this.id = id;
         this.postEntity = postEntity;
         this.fileName = fileName;
         this.filePath = filePath;
+        this.originName = originName;
     }
 
 }

@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <title>블로그 글 목록</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <style>
+        #div-selectFile{
+            height : 50px;
+            width : 100px;
+            border-color:#6495ed;
+            background-color:#bcd2ee;
+            border-radius : 20px;
+            margin:auto;
+            text-align:center;
+            box-shadow : 3px 3px 3px black;
+            transition-duration : 0.3s;
+        }
+        #div-selectFile:active{
+            margin-left:5px;
+            margin-top:5px;
+            box-shadow:none;
+        }
+
+    </style>
 </head>
 <body>
 <div class="container">
@@ -40,15 +59,20 @@
 
         <button type="button" class="btn btn-success" id="imgUpdateBtn" >이미지 추가/삭제</button>
 
+
         <div id = 'imgUpdateForm' style="display:none;">
 
-        <div id="exist-img">
-        </div>
+            <label className="inputFileCustom" for="realSelectFile">
+                <div id="div-selectFile">파일 선택</div>
+            </label>
 
-        <input type="file" name="files" multiple="multiple" onchange="test(this.files)">
+            <div id="exist-img">
+            </div>
+
+            <input type="file" name="files" multiple="multiple" onchange="test(this.files)" id="realSelectFile" style="display:none;">
 <!--        this.files  : 내가 인풋태그에 첨부한 파일-->
-        <div id="file-list">
-        </div>
+            <div id="file-list">
+            </div>
 
         </div>
 
@@ -67,6 +91,10 @@
 
 
 <script >
+
+
+
+
     document.getElementById('imgUpdateBtn').addEventListener('click', function(){
         document.getElementById('imgUpdateForm').style.display = 'block';
         document.getElementById('imgUpdateBtn').style.display = 'none';
@@ -121,10 +149,6 @@
 
             });
     });
-
-
-
-
 function Message()  {
 
         console.log(data2);
@@ -137,7 +161,6 @@ function Message()  {
                 console.log(files);
 
                 const fileList = document.getElementById('file-list');
-
 
                 for(let i=0; i<files.length; i++) {
                     selectedFiles.push(files[i]);
